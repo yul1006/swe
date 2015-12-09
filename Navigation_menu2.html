@@ -1,0 +1,139 @@
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta charset="utf-8">
+
+<title>Navigation</title>
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6dd3jZskXqLONALiIGQTts1Yqy5nn8MA"></script>
+	<script src="https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=4beee350-195e-30f3-8c54-c2a23fda4079"></script>
+<script type="text/javascript">
+
+
+var c_lat;
+var c_lng;
+var d_lat;
+var d_lng;
+var map;
+//var address = "수원시청";
+var address =localStorage.getItem("a");
+alert("주소받와앗니?"+address);
+
+
+function getLocation() {
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(setPosition);
+    } 
+}
+
+	function setPosition(position) {
+	
+	    c_lat=position.coords.latitude;
+	    c_lng=position.coords.longitude;
+
+	    var geocoder = new google.maps.Geocoder();
+	    geocodeAddress(geocoder);
+	    function geocodeAddress(geocoder) {
+			
+			geocoder.geocode({
+				'address' : address
+			}, function(results, status) {
+				if (status === google.maps.GeocoderStatus.OK) {
+					
+					var tes=results[0].geometry.location;
+					
+					tes = results[0].geometry.location.toString();
+					 tes = tes.slice(1, tes.length - 1);
+					var tes2 = tes.split(", ");
+					 d_lat = tes2[0];
+					 d_lng = tes2[1];
+	
+					 initTmap();
+					
+				} else {
+					alert('Geocode was not successful for the following reason: '
+							+ status);
+				}
+			});
+		}
+	    
+	}
+		
+function initTmap() {
+		
+		centerLL = new Tmap.LonLat(14145677.4, 4511257.6);
+		map = new Tmap.Map({
+			div : 'map_div',
+			width : '100%',
+			height : '100%',
+			transitionEffect : "resize",
+			animation : true
+		});
+		searchRoute();
+	};
+	//경로 정보 로드
+	function searchRoute() {
+		
+	 	var routeFormat = new Tmap.Format.KML({
+			extractStyles : true,
+			extractAttributes : true
+		}); 
+
+		var pr_3857 = new Tmap.Projection("EPSG:3857"); 
+		var pr_4326 = new Tmap.Projection("EPSG:4326"); 
+		var c_lonlat = new Tmap.LonLat(c_lng, c_lat).transform(pr_4326, pr_3857); 
+		var d_lonlat = new Tmap.LonLat(d_lng, d_lat).transform(pr_4326, pr_3857); 
+		var startX = c_lonlat.lon;
+		var startY = c_lonlat.lat;
+		var endX = d_lonlat.lon;
+		var endY = d_lonlat.lat;
+		var urlStr = "https://apis.skplanetx.com/tmap/routes?version=1&format=xml";
+		urlStr += "&startX=" + startX;
+		urlStr += "&startY=" + startY;
+		urlStr += "&endX=" + endX;
+		urlStr += "&endY=" + endY;
+		urlStr += "&appKey=4beee350-195e-30f3-8c54-c2a23fda4079";
+		var prtcl = new Tmap.Protocol.HTTP({
+			url : urlStr,
+			format : routeFormat
+		});
+		var routeLayer = new Tmap.Layer.Vector("route", {
+			protocol : prtcl,
+			strategies : [ new Tmap.Strategy.Fixed() ]
+		});
+		routeLayer.events
+				.register("featuresadded", routeLayer, onDrawnFeatures);
+		map.addLayer(routeLayer);
+	}
+	//경로 그리기 후 해당영역으로 줌
+	function onDrawnFeatures(e) {
+		
+		map.zoomToExtent(this.getDataExtent());
+	}
+
+	
+	</script>
+
+
+</head>
+<body onload = "getLocation()">
+	<div id="map_div">
+	<button onclick='gohome()' >Home</button>
+	</div>	
+	<div>
+	
+	
+	<script>
+	function gohome() {
+		location.href = ('index.html');
+	}
+
+	</script>
+	
+	</div>
+</body>
+</html>
