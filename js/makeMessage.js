@@ -33,7 +33,7 @@ function ridingCheck() {
 	}
 }
 
-function batteryCheck() {
+function batteryCheck() { 
 	var ba = parseInt(batteryRemains);
 	if ( ba<= 50) {
 		alert("Battery is short. \nSystem is terminated.");
@@ -186,15 +186,16 @@ function interpretMsg(data) {
 		localStorage.setItem("a",addressToString);
 		target_temperature = obj.target_temperature;
 		keeping_time = obj.keeping_time;
+		batteryCheck();
+		ridingCheck(); 
 		sendMsg(4, auth_result, user_id, end_result, batteryRemains,temperature, airconditioner, target_temperature);
 		setTimeout("stopSystem()", 120000);//10+10분후에 사람안타면 종료, 필수
 		
-		//alert("네비게이션 목적지"+addressToString);
+		
 		if(destination==""){
 			alert("바로 출발");		
 		}
-		//airconditioner = "true";
-		
+	
 
 	}
 
